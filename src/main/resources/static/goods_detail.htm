@@ -74,11 +74,11 @@
                 if (data.code == 200) {
                    window.location.href = "/order_detail.htm?orderId=" + data.obj.id;
                 } else {
-                    layer.msg(data.msg);
+                    layer.msg(data.message);
                 }
             },
-            error: function () {
-                layer.msg("客户端请求有误");
+            error: function (data) {
+                layer.msg(data.message);
             }
         });
     }
@@ -118,11 +118,11 @@
                     //将数据渲染出来
                     render(data.obj);
                 } else {
-                    layer.msg(data.msg);
+                    layer.msg(data.message);
                 }
             },
-            error: function () {
-                layer.msg("客户端请求有误");
+            error: function (data) {
+                layer.msg(data.message);
             }
         });
     }

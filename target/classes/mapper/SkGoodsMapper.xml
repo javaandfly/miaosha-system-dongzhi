@@ -34,7 +34,7 @@
             sg.end_date
         FROM
             sk_goods g
-                LEFT JOIN sk_goods_seckill AS sg ON g.id = sg.goods_id
+                LEFT JOIN sk_goods_sec_kill AS sg ON g.id = sg.goods_id
     </select>
     <!-- 获取商品详情 -->
     <select id="findGoodsVoByGoodsId" resultType="com.dong.vo.GoodVo">
@@ -52,7 +52,7 @@
         sg.end_date
         FROM
         sk_goods g
-        LEFT JOIN sk_goods_seckill AS sg ON g.id = sg.goods_id
+        LEFT JOIN sk_goods_sec_kill AS sg ON g.id = sg.goods_id
         WHERE
         g.id =#{goodsId}
     </select>

@@ -10,6 +10,7 @@ import lombok.ToString;
 public enum RespBeanEnum {
     SUCCESS(200,"SECCESS"),
     ERROR(500,"服务器异常"),
+    LOGIN2_ERROR(500230,"该用户已存在"),
     LOGIN_ERROR(500210,"用户名或者密码错误"),
     Mobile_ERROR(500211,"手机号格式错误"),
     BIND_ERROR(500222,"参数校验异常"),

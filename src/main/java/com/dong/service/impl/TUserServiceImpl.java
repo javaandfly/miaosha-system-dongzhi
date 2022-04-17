@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -72,7 +73,7 @@ public class TUserServiceImpl extends ServiceImpl<SkUserMapper, SkUser> implemen
         //生成cookie
         String ticket = UUIDUtil.uuid();
         //将用户信息存入redis中
-        redisTemplate.opsForValue().set("user:" + ticket, tUser);
+        redisTemplate.opsForValue().set("user:"+ ticket, tUser,600, TimeUnit.MINUTES);
         CookieUtils.setCookie(httpServletRequest, httpServletResponse, "userTicket", ticket);
         return RespBean.success(ticket);
 
@@ -98,9 +99,9 @@ public class TUserServiceImpl extends ServiceImpl<SkUserMapper, SkUser> implemen
     public RespBean toRegister(RegisterVo registerVo, HttpServletRequest request, HttpServletResponse response) {
         //获取前端账号Mobile和密码Password
         String mobile = registerVo.getMobile();
-        String nickname=registerVo.getNickname();
         String password = registerVo.getPassword();
-        if (mobile==null ||StringUtils.isEmpty(nickname)||StringUtils.isEmpty(password)){
+        String nickname = registerVo.getNickname();
+        if (mobile==null ||StringUtils.isEmpty(password) || StringUtils.isEmpty(nickname)){
             return RespBean.error(RespBeanEnum.SESSION_ERROR);
         }
         //判断账号是否为手机号
@@ -109,15 +110,20 @@ public class TUserServiceImpl extends ServiceImpl<SkUserMapper, SkUser> implemen
 
             return RespBean.error(RespBeanEnum.Mobile_ERROR);
         }
+        SkUser skUser = tUserMapper.selectById(mobile);
+        if (skUser!=null){
+            return  RespBean.error(RespBeanEnum.LOGIN2_ERROR);
+        }
         SkUser user = new SkUser();
        user.setId(Long.parseLong(mobile));
         user.setNickname(nickname);
         user.setRegisterDate(new Date());
         user.setSalt("1a2b3c4d");
+        user.setPassword(MD5Utils.fromPassToDbPass(password,user.getSalt()));
         user.setLastLoginDate(new Date());
-        MD5Utils.fromPassToDbPass(password,user.getSalt());
+        user.setHead(null);
+        user.setLoginCount(1);
         tUserMapper.insert(user);
-        System.out.println(user);
         return RespBean.success(user);
     }
 

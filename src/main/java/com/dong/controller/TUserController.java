@@ -1,6 +1,9 @@
 package com.dong.controller;
 
 
+import com.dong.pojo.SkUser;
+import com.dong.vo.RespBean;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -13,8 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
  * @author DongZhi
  * @since 2022-02-22
  */
-@RestController
-@RequestMapping("/t-user")
+@Controller
+@RequestMapping("/user")
 public class TUserController {
-
+    /**
+     * 测试
+     * @param user
+     * @return
+     */
+    @RequestMapping("/info")
+    public RespBean info(SkUser user){
+        return  RespBean.success(user);
+    }
 }

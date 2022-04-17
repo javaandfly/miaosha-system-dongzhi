@@ -43,17 +43,14 @@
             <td id="orderStatus">
             </td>
             <td>
-                <button class="btn btn-primary btn-block" type="submit" id="payButton">立即支付</button>
+                <button class="btn btn-primary btn-block" type="submit" id="payButton" onclick=doimg()>立即支付</button>
             </td>
         </tr>
         <tr>
             <td>收货人</td>
-            <td colspan="2">XXX  15036299469</td>
+            <td id="nickname" colspan="2"></td>
         </tr>
-        <tr>
-            <td>收货地址</td>
-            <td colspan="2">河南省郑州市</td>
-        </tr>
+
     </table>
 </div>
 </body>
@@ -75,7 +72,7 @@
                 if(data.code == 200){
                     render(data.obj);
                 }else{
-                    layer.msg(data.msg);
+                    layer.msg(data.message);
                 }
             },
             error:function(){
@@ -86,10 +83,12 @@
     function render(detail){
         var goods = detail.goodVo;
         var order = detail.order;
+        var user=detail.user;
         $("#goodsName").text(goods.goodsName);
         $("#goodsImg").attr("src", goods.goodsImg);
         $("#orderPrice").text(order.goodsPrice);
         $("#createDate").text(new Date(order.createDate).format("yyyy-MM-dd hh:mm:ss"));
+        $("#nickname").text(user.nickname);
         var status = "";
         if(order.status == 0){
             status = "未支付"
@@ -97,6 +96,10 @@
             status = "待发货";
         }
         $("#orderStatus").text(status);
+    }
+    function doimg(){
+     window.location.href="/sk_user/pap";
+
     }
 
 

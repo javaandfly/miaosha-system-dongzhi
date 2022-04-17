@@ -21,7 +21,8 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 public class SkUser implements Serializable {
-    @TableId(type = IdType.AUTO)
+
+    @TableId(value = "id",type = IdType.INPUT)
     private Long id;
 
     /**

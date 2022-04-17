@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<!-- bootstrap -->
+<link rel="stylesheet" type="text/css" th:href="@{/bootstrap/css/bootstrap.min.css}"/>
+<script type="text/javascript" th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+<head>
+
+</head>
+<body>
+<a class="social weixin" href="javascript:">
+    <div align="center">
+    <img th:src="@{/img/erweima.jpg}" width="300" height="400" alt="">
+    <img th:src="@{/img/zhifubao.jpg}" width="300" height="400" alt="">
+    </div>
+    <div class="col-md-5">
+        <button class="btn btn-primary btn-block" type="submit" onclick="fine()">支付成功</button>
+    </div>
+    </div>
+</a>
+<script>
+    function fine() {
+        window.location.href="/goods/toList"
+    }
+</script>
+</body>
+
+</html>

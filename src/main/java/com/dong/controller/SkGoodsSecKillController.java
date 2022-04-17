@@ -15,6 +15,7 @@ import com.dong.vo.OrderDetailVo;
 import com.dong.vo.RespBean;
 import com.dong.vo.RespBeanEnum;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +41,8 @@ public class SkGoodsSecKillController {
     ISkOrderService iSkOrderService;
     @Autowired
     ISkOrderInfoService    iSkOrderInfoService;
+    @Autowired
+    RedisTemplate redisTemplate;
     @RequestMapping("/do_secKill")
     public String secKill(Model model, SkUser user,Long goodsId){
         //是否登录 如果没有用户信息 返回到登录页面
@@ -81,11 +84,12 @@ public class SkGoodsSecKillController {
             return RespBean.error(RespBeanEnum.EMPTY_STOCK);
         }
 //        防止二次买入 每人只能买一次
-        SkOrder one = iSkOrderService.getOne(new QueryWrapper<SkOrder>()
-                .eq("user_id", user.getId())
-                .eq("goods_id", goodsId));
+//        SkOrder one = iSkOrderService.getOne(new QueryWrapper<SkOrder>()
+//                .eq("user_id", user.getId())
+//                .eq("goods_id", goodsId));
+        //从redis取出这个数据如果不为空就给抢购
+        SkOrder one = (SkOrder) redisTemplate.opsForValue().get("order" + user.getId() + ":" + goodsId);
         if (one!=null){
-
             return RespBean.error(RespBeanEnum.REPEATE_ERROR);
         }
         //抢购页面

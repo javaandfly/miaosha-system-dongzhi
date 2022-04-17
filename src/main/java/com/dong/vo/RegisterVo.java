@@ -8,14 +8,11 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class RegisterVo {
     @NotNull
     @IsMobile
     private String mobile;
     @NotNull
-    @IsMobile
     private String nickname;
     @NotNull
     @Length(min = 32)
