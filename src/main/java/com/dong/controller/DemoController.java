@@ -10,7 +10,6 @@ public class DemoController {
 
     @RequestMapping("/123")
     public String demo01(Model model){
-        model.addAttribute("name","xxxx");
         return "hello";
     }
 }

@@ -1,17 +1,12 @@
 package com.dong.service.impl;
 
+import com.dong.config.MailClient;
 import com.dong.pojo.SkUser;
 import com.dong.mapper.SkUserMapper;
 import com.dong.service.ITUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.dong.utils.CookieUtils;
-import com.dong.utils.MD5Utils;
-import com.dong.utils.UUIDUtil;
-import com.dong.utils.ValidatorUtils;
-import com.dong.vo.RegisterVo;
-import com.dong.vo.RespBean;
-import com.dong.vo.RespBeanEnum;
-import com.dong.vo.loginVo;
+import com.dong.utils.*;
+import com.dong.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -19,6 +14,10 @@ import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -43,11 +42,14 @@ public class TUserServiceImpl extends ServiceImpl<SkUserMapper, SkUser> implemen
      SkUserMapper tUserMapper;
     @Autowired
      RedisTemplate redisTemplate;
+    @Autowired
+    MailClient mailClient;
     @Override
     public RespBean doLogin(loginVo loginVo, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         //获取前端账号Mobile和密码Password
         String mobile = loginVo.getMobile();
         String password = loginVo.getPassword();
+        String vCode = loginVo.getVCode();
         //判断账号密码是否为空
         if (StringUtils.isEmpty(mobile) || StringUtils.isEmpty(password)){
             return RespBean.error(RespBeanEnum.LOGIN_ERROR);
@@ -57,6 +59,13 @@ public class TUserServiceImpl extends ServiceImpl<SkUserMapper, SkUser> implemen
             //如果不是手机号，调用公共返回类RespBean方法中的方法error 然后传入错误信息，输出
 
             return RespBean.error(RespBeanEnum.Mobile_ERROR);
+        }
+        String vCode01 = (String) redisTemplate.opsForValue().get(mobile);
+        if (StringUtils.isEmpty(vCode01)){
+            return RespBean.error(RespBeanEnum.CODE_ERROR);
+        }
+        if (!vCode01.equals(vCode)){
+            return RespBean.error(RespBeanEnum.CODE02_ERROR);
         }
 
         //根据手机号获取用户，从数据库查询
@@ -73,7 +82,7 @@ public class TUserServiceImpl extends ServiceImpl<SkUserMapper, SkUser> implemen
         //生成cookie
         String ticket = UUIDUtil.uuid();
         //将用户信息存入redis中
-        redisTemplate.opsForValue().set("user:"+ ticket, tUser,600, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set("user:"+ ticket, tUser,60, TimeUnit.MINUTES);
         CookieUtils.setCookie(httpServletRequest, httpServletResponse, "userTicket", ticket);
         return RespBean.success(ticket);
 
@@ -101,32 +110,57 @@ public class TUserServiceImpl extends ServiceImpl<SkUserMapper, SkUser> implemen
         String mobile = registerVo.getMobile();
         String password = registerVo.getPassword();
         String nickname = registerVo.getNickname();
-        if (mobile==null ||StringUtils.isEmpty(password) || StringUtils.isEmpty(nickname)){
+        if (mobile == null || StringUtils.isEmpty(password) || StringUtils.isEmpty(nickname)) {
             return RespBean.error(RespBeanEnum.SESSION_ERROR);
         }
         //判断账号是否为手机号
-        if (!ValidatorUtils.isMobile(mobile)){
+        if (!ValidatorUtils.isMobile(mobile)) {
             //如果不是手机号，调用公共返回类RespBean方法中的方法error 然后传入错误信息，输出
 
             return RespBean.error(RespBeanEnum.Mobile_ERROR);
         }
         SkUser skUser = tUserMapper.selectById(mobile);
-        if (skUser!=null){
-            return  RespBean.error(RespBeanEnum.LOGIN2_ERROR);
+        if (skUser != null) {
+            return RespBean.error(RespBeanEnum.LOGIN2_ERROR);
         }
         SkUser user = new SkUser();
-       user.setId(Long.parseLong(mobile));
+        user.setId(Long.parseLong(mobile));
         user.setNickname(nickname);
         user.setRegisterDate(new Date());
         user.setSalt("1a2b3c4d");
-        user.setPassword(MD5Utils.fromPassToDbPass(password,user.getSalt()));
+        user.setPassword(MD5Utils.fromPassToDbPass(password, user.getSalt()));
         user.setLastLoginDate(new Date());
         user.setHead(null);
         user.setLoginCount(1);
         tUserMapper.insert(user);
         return RespBean.success(user);
     }
-
+    @Override
+    public RespBean doCode(VCodeVo vCode) throws IOException {
+        String email = vCode.getEmail();
+        String mobile = vCode.getMobile();
+        if (StringUtils.isEmpty(email)){
+            return RespBean.error(RespBeanEnum.REQUEST_ERROR);
+        }
+        String s = new CodeV().codeV(email);
+//        Socket socket = null;
+//        OutputStream os = null;
+//        //1.创建Socket对象，指明服务器端的ip和端口号
+//        InetAddress inet = InetAddress.getByName("43.138.37.7");
+//        socket = new Socket(inet, 13000);
+//        //2.获取一个输出流，用于输出数据
+//        os = socket.getOutputStream();
+//        //3.写出数据的操作
+//        String str="{"+"\""+"senduser"+"\""+":"+"\""+"3267919396@qq.com"+"\""+","+
+//                "\n"+"\""+"recvuser"+"\""+":"+"\""+email+"\""+","+
+//                "\n"+"\""+"sqm"+"\""+":"+"\""+"hylsbgtrleukcicj"+"\""+","+
+//                "\n"+"\""+"data"+"\""+":"+"\""+"您的验证码为"+s+"\""+"}";
+//        System.out.println(str);
+//        os.write(str.getBytes());
+        mailClient.sendMail(email,"你好，亲爱的"+mobile,"您的验证码为"+s);
+        redisTemplate.opsForValue().set(mobile,s,120, TimeUnit.SECONDS);
+        return RespBean.success(vCode);
+    }
 
 
 }

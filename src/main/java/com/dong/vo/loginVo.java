@@ -15,4 +15,6 @@ public class loginVo {
     @NotNull
     @Length(min = 32)
     private String password;
+    private String vCode;
+
 }

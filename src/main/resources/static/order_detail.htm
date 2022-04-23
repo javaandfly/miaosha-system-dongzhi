@@ -50,6 +50,10 @@
             <td>收货人</td>
             <td id="nickname" colspan="2"></td>
         </tr>
+        <tr>
+            <td>收货人电话</td>
+            <td id="number" colspan="2"></td>
+        </tr>
 
     </table>
 </div>
@@ -89,6 +93,7 @@
         $("#orderPrice").text(order.goodsPrice);
         $("#createDate").text(new Date(order.createDate).format("yyyy-MM-dd hh:mm:ss"));
         $("#nickname").text(user.nickname);
+        $("#number").text(user.id);
         var status = "";
         if(order.status == 0){
             status = "未支付"

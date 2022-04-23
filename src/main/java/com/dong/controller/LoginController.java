@@ -1,6 +1,7 @@
 package com.dong.controller;
 
 import com.dong.service.ITUserService;
+import com.dong.service.impl.TUserServiceImpl;
 import com.dong.vo.RegisterVo;
 import com.dong.vo.RespBean;
 import com.dong.vo.loginVo;
@@ -21,7 +22,7 @@ import javax.validation.Valid;
 @Slf4j
 public class LoginController {
     @Autowired
-    ITUserService itUserService;
+    TUserServiceImpl itUserService;
     //跳转登陆页面
     @RequestMapping("/toLogin")
     public String toLogin(){
